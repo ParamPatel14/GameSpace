@@ -65,3 +65,19 @@ class LibraryEntrySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # The view handles passing the user, but we double check here if needed
         return super().create(validated_data)
+    
+from .models import Review # Ensure Review is imported
+
+# --- 6. Review Serializer (Snippet-05) ---
+class ReviewSerializer(serializers.ModelSerializer):
+    # Enforce strict 1-10 range as per document Page 16/20
+    rating = serializers.IntegerField(min_value=1, max_value=10)
+    
+    class Meta:
+        model = Review
+        fields = ['id', 'user', 'game', 'rating', 'comment', 'created_at']
+        read_only_fields = ['user', 'created_at']
+
+    def validate(self, data):
+        # Optional: Custom validation logic can go here
+        return data

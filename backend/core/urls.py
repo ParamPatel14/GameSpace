@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     RegisterView, CustomTokenObtainPairView, UserProfileView,
-    GameListView, LibraryEntryCreateView, LibraryEntryDetailView # Add these imports
+    GameListView, LibraryEntryCreateView, LibraryEntryDetailView,ReviewCreateView # Add these imports
 )
 
 urlpatterns = [
@@ -21,4 +21,5 @@ urlpatterns = [
     # Library Endpoints
     path('library/', LibraryEntryCreateView.as_view(), name='library-list-create'),
     path('library/<int:pk>/', LibraryEntryDetailView.as_view(), name='library-detail'),
+    path('reviews/', ReviewCreateView.as_view(), name='create-review'),
 ]

@@ -32,6 +32,13 @@ class Game(models.Model):
     # Average rating is updated automatically when reviews are added
     average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
 
+    def update_average_rating(self):
+        # Calculate the average from all related reviews
+        from django.db.models import Avg
+        average = self.reviews.aggregate(Avg('rating'))['rating__avg'] or 0.0
+        self.average_rating = round(average, 2)
+        self.save()
+
     def __str__(self):
         return self.title
 

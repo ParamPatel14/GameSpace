@@ -82,3 +82,55 @@ class LibraryEntryDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         # Ensure users can only edit/delete their own entries
         return LibraryEntry.objects.filter(user=self.request.user)
+    
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView # Using APIView for custom transaction logic
+from rest_framework import status
+from .models import Review
+
+# ... existing views ...
+
+# --- 7. Create Review View (Atomic Transaction - Snippet-04) ---
+class ReviewCreateView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data = request.data
+        user = request.user
+        game_id = data.get('game_id') or data.get('game') # Handle both inputs
+
+        # 1. Validation before transaction
+        if not game_id:
+            return Response({"error": "Game ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # 2. ATOMIC BLOCK (The Core Logic)
+            with transaction.atomic():
+                # Check for existing review (Locking logic implied)
+                if Review.objects.filter(user=user, game_id=game_id).exists():
+                    raise ValueError("You have already reviewed this game.")
+
+                # Create the review
+                review = Review.objects.create(
+                    user=user,
+                    game_id=game_id,
+                    rating=data['rating'],
+                    comment=data.get('comment', '')
+                )
+
+                # 3. Trigger Game Update
+                game = Game.objects.get(id=game_id)
+                game.update_average_rating()
+
+                return Response({
+                    "success": True, 
+                    "data": {"id": review.id, "rating": review.rating}
+                }, status=status.HTTP_201_CREATED)
+
+        except ValueError as e:
+            return Response({"success": False, "error": str(e)}, status=status.HTTP_409_CONFLICT)
+        except Exception as e:
+            return Response({"success": False, "error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
