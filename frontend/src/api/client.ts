@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-    baseURL: '[http://127.0.0.1:8000/api](http://127.0.0.1:8000/api)',
+    // FIXED: Removed Markdown brackets []() from the string
+    baseURL: 'http://127.0.0.1:8000/api',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -34,8 +35,6 @@ apiClient.interceptors.response.use(
             if (typeof errData === 'string') {
                 message = errData;
             } else if (typeof errData === 'object') {
-                // Flatten Django's {"field": ["error"]} format into a single string
-                // Example: "email: Enter a valid email address."
                 const messages = Object.entries(errData).map(([key, val]) => {
                     const valStr = Array.isArray(val) ? val.join(' ') : String(val);
                     return `${key}: ${valStr}`;
@@ -44,7 +43,6 @@ apiClient.interceptors.response.use(
             }
         }
         
-        // Reject with the formatted string so the Component can just display it
         return Promise.reject(message);
     }
 );

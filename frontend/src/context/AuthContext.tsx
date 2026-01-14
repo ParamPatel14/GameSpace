@@ -7,8 +7,6 @@ import React, {
 import apiClient from '../api/client';
 import type { ReactNode } from 'react';
 
-/* ---------- Types ---------- */
-
 interface User {
     id: number;
     username: string;
@@ -28,11 +26,9 @@ interface AuthContextType {
     isLoading: boolean;
 }
 
-/* ---------- Context ---------- */
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/* ---------- Provider ---------- */
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -58,12 +54,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             username: string,
             password: string
         ): Promise<void> => {
-            const response = await apiClient.post<LoginResponse>(
+        
+            const response = await apiClient.post<any>(
                 '/auth/login/',
                 { username, password }
             );
 
-            const { access, refresh, user } = response.data;
+            
+            const { access, refresh, user } = response as unknown as LoginResponse;
 
             localStorage.setItem('access_token', access);
             localStorage.setItem('refresh_token', refresh);

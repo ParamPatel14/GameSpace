@@ -19,7 +19,7 @@ export default function RegisterPage() {
                 password,
                 role: 'GAMER' 
             });
-            navigate('/login');
+            navigate('/login/');
         } catch (err: any) {
             // The interceptor now returns a string, so we can set it directly
             setError(err || 'Registration failed');
